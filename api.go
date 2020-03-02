@@ -2,6 +2,7 @@ package recipepuppy
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -27,12 +28,13 @@ const APIHREF = "http://recipepuppy.com/api"
 
 // FindRecipes finds recipes that match the search term provided
 func FindRecipes(searchTerm string) ([]Recipe, error) {
-	query := url.Values{}
-	query.Add("q", searchTerm)
+	if len(searchTerm) == 0 {
+		return []Recipe{}, errors.New("Search term cannot be blank")
+	}
 
-	results := &response{}
+	results := response{}
 
-	err := makeRequest(query, results)
+	err := makeRequest(url.Values{"q": []string{searchTerm}}, &results)
 	if err != nil {
 		return nil, err
 	}
@@ -42,12 +44,13 @@ func FindRecipes(searchTerm string) ([]Recipe, error) {
 
 // FindRecipesByIngredient finds recipes that use the provided ingredient
 func FindRecipesByIngredient(ingredient string) ([]Recipe, error) {
-	query := url.Values{}
-	query.Add("i", ingredient)
+	if len(ingredient) == 0 {
+		return []Recipe{}, errors.New("Ingredient cannot be blank")
+	}
 
-	results := &response{}
+	results := response{}
 
-	err := makeRequest(query, results)
+	err := makeRequest(url.Values{"i": []string{ingredient}}, &results)
 	if err != nil {
 		return nil, err
 	}
