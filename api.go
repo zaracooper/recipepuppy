@@ -30,8 +30,8 @@ const APIHREF = "http://recipepuppy.com/api"
 // FindRecipes finds recipes that match the recipe titles provided. The API returns
 // 10 results at a time. So use page to specify what page of results to fecth.
 func FindRecipes(recipeTitles []string, page int) ([]Recipe, error) {
-	if isQueryBlank(recipeTitles) {
-		return []Recipe{}, errors.New("Recipe titles cannot be blank")
+	if isQueryBlank(recipeTitles) || page == 0 {
+		return []Recipe{}, errors.New("Recipe titles cannot be blank. Page cannot be zero")
 	}
 
 	results := response{}
@@ -47,8 +47,8 @@ func FindRecipes(recipeTitles []string, page int) ([]Recipe, error) {
 // FindRecipesWithIngredients finds recipes that match the recipe titles and ingredients provided. The API returns
 // 10 results at a time. So use page to specify what page of results to fecth.
 func FindRecipesWithIngredients(recipeTitles []string, ingredients []string, page int) ([]Recipe, error) {
-	if isQueryBlank(recipeTitles) || isQueryBlank(ingredients) {
-		return []Recipe{}, errors.New("Recipe titles or ingredients cannot be blank")
+	if isQueryBlank(recipeTitles) || isQueryBlank(ingredients) || page == 0 {
+		return []Recipe{}, errors.New("Recipe titles or ingredients cannot be blank. Page cannot be zero")
 	}
 
 	results := response{}
@@ -61,11 +61,11 @@ func FindRecipesWithIngredients(recipeTitles []string, ingredients []string, pag
 	return results.Recipes, nil
 }
 
-// FindRecipesByIngredient finds recipes that use the provided ingredient. The API returns
+// FindRecipesByIngredients finds recipes that use the provided ingredient. The API returns
 // 10 results at a time. So use page to specify what page of results to fecth.
-func FindRecipesByIngredient(ingredients []string, page int) ([]Recipe, error) {
-	if isQueryBlank(ingredients) {
-		return []Recipe{}, errors.New("Ingredient cannot be blank")
+func FindRecipesByIngredients(ingredients []string, page int) ([]Recipe, error) {
+	if isQueryBlank(ingredients) || page == 0 {
+		return []Recipe{}, errors.New("Ingredient cannot be blank. Page cannot be zero")
 	}
 
 	results := response{}
