@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 // Recipe is a recipe for a meal
@@ -26,15 +27,31 @@ type response struct {
 // APIHREF is the HREF of the Recipe Puppy API
 const APIHREF = "http://recipepuppy.com/api"
 
-// FindRecipes finds recipes that match the search term provided
-func FindRecipes(searchTerm string) ([]Recipe, error) {
-	if len(searchTerm) == 0 {
-		return []Recipe{}, errors.New("Search term cannot be blank")
+// FindRecipes finds recipes that match the recipe titles provided
+func FindRecipes(recipeTitles []string, page int) ([]Recipe, error) {
+	if isQueryBlank(recipeTitles) {
+		return []Recipe{}, errors.New("Recipe titles cannot be blank")
 	}
 
 	results := response{}
 
-	err := makeRequest(url.Values{"q": []string{searchTerm}}, &results)
+	err := makeRequest(url.Values{"q": recipeTitles}, &results)
+	if err != nil {
+		return nil, err
+	}
+
+	return results.Recipes, nil
+}
+
+// FindRecipesWithIngredients finds recipes that match the recipe titles and ingredients provided
+func FindRecipesWithIngredients(recipeTitles []string, ingredients []string, page int) ([]Recipe, error) {
+	if isQueryBlank(recipeTitles) || isQueryBlank(ingredients) {
+		return []Recipe{}, errors.New("Recipe titles or ingredients cannot be blank")
+	}
+
+	results := response{}
+
+	err := makeRequest(url.Values{"q": recipeTitles}, &results)
 	if err != nil {
 		return nil, err
 	}
@@ -43,19 +60,23 @@ func FindRecipes(searchTerm string) ([]Recipe, error) {
 }
 
 // FindRecipesByIngredient finds recipes that use the provided ingredient
-func FindRecipesByIngredient(ingredient string) ([]Recipe, error) {
-	if len(ingredient) == 0 {
+func FindRecipesByIngredient(ingredients []string, page int) ([]Recipe, error) {
+	if isQueryBlank(ingredients) {
 		return []Recipe{}, errors.New("Ingredient cannot be blank")
 	}
 
 	results := response{}
 
-	err := makeRequest(url.Values{"i": []string{ingredient}}, &results)
+	err := makeRequest(url.Values{"i": ingredients}, &results)
 	if err != nil {
 		return nil, err
 	}
 
 	return results.Recipes, nil
+}
+
+func isQueryBlank(query []string) bool {
+	return len(strings.TrimSpace(strings.Join(query, ""))) == 0
 }
 
 func makeRequest(query url.Values, results interface{}) error {
