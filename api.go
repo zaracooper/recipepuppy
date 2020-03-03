@@ -27,7 +27,8 @@ type response struct {
 // APIHREF is the HREF of the Recipe Puppy API
 const APIHREF = "http://recipepuppy.com/api"
 
-// FindRecipes finds recipes that match the recipe titles provided
+// FindRecipes finds recipes that match the recipe titles provided. The API returns
+// 10 results at a time. So use page to specify what page of results to fecth.
 func FindRecipes(recipeTitles []string, page int) ([]Recipe, error) {
 	if isQueryBlank(recipeTitles) {
 		return []Recipe{}, errors.New("Recipe titles cannot be blank")
@@ -43,7 +44,8 @@ func FindRecipes(recipeTitles []string, page int) ([]Recipe, error) {
 	return results.Recipes, nil
 }
 
-// FindRecipesWithIngredients finds recipes that match the recipe titles and ingredients provided
+// FindRecipesWithIngredients finds recipes that match the recipe titles and ingredients provided. The API returns
+// 10 results at a time. So use page to specify what page of results to fecth.
 func FindRecipesWithIngredients(recipeTitles []string, ingredients []string, page int) ([]Recipe, error) {
 	if isQueryBlank(recipeTitles) || isQueryBlank(ingredients) {
 		return []Recipe{}, errors.New("Recipe titles or ingredients cannot be blank")
@@ -59,7 +61,8 @@ func FindRecipesWithIngredients(recipeTitles []string, ingredients []string, pag
 	return results.Recipes, nil
 }
 
-// FindRecipesByIngredient finds recipes that use the provided ingredient
+// FindRecipesByIngredient finds recipes that use the provided ingredient. The API returns
+// 10 results at a time. So use page to specify what page of results to fecth.
 func FindRecipesByIngredient(ingredients []string, page int) ([]Recipe, error) {
 	if isQueryBlank(ingredients) {
 		return []Recipe{}, errors.New("Ingredient cannot be blank")
