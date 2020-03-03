@@ -9,7 +9,8 @@ import (
 )
 
 type testCase struct {
-	Recipe      string
+	Recipes     []string
+	Ingredients []string
 	ResultCount int
 	GotError    bool
 	Responder   httpmock.Responder
@@ -26,29 +27,51 @@ func (errReader) Close() error {
 }
 
 func TestFindRecipes(t *testing.T) {
-	runEmptyArgTest(t, FindRecipes)
-
-	cases := []testCase{
-		{"mashed potatoes", 1, false, httpmock.NewStringResponder(200, `{"results": [{"title": "Mashed Potatoes", "href": "link.to/recipe", "ingredients":"potatoes"}]}`)},
-		{"wagyu steak", 0, false, httpmock.NewStringResponder(404, `{"results": []}`)},
-		{"flat bread", 0, true, httpmock.NewStringResponder(200, `😀`)},
-		{"hamburger", 0, true, httpmock.ResponderFromResponse(&http.Response{StatusCode: 501, Body: errReader(0)})},
-		{"hotdog", 0, true, httpmock.NewErrorResponder(errors.New("test error"))},
+	wrappedSubject := func(nonEmptyArg []string, emptyArg []string, page int) ([]Recipe, error) {
+		return FindRecipes(nonEmptyArg, page)
 	}
 
-	runAPICallTest("q", cases, t, FindRecipes)
+	runEmptyArgsTest(t, wrappedSubject)
+
+	cases := []testCase{
+		{[]string{"mashed potatoes"}, []string{}, 1, false, httpmock.NewStringResponder(200, `{"results": [{"title": "Mashed Potatoes", "href": "link.to/recipe", "ingredients":"potatoes"}]}`)},
+		{[]string{"wagyu steak"}, []string{}, 0, false, httpmock.NewStringResponder(404, `{"results": []}`)},
+		{[]string{"flat bread"}, []string{}, 0, true, httpmock.NewStringResponder(200, `😀`)},
+		{[]string{"hamburger"}, []string{}, 0, true, httpmock.ResponderFromResponse(&http.Response{StatusCode: 501, Body: errReader(0)})},
+		{[]string{"hotdog"}, []string{}, 0, true, httpmock.NewErrorResponder(errors.New("test error"))},
+	}
+
+	runAPICallTest(cases, t, wrappedSubject)
+}
+
+func TestFindRecipesWithIngredients(t *testing.T) {
+	runEmptyArgsTest(t, FindRecipesWithIngredients)
+
+	cases := []testCase{
+		{[]string{"bhaji"}, []string{"tumeric"}, 1, false, httpmock.NewStringResponder(200, `{"results": [{"title": "Mashed Potatoes", "href": "link.to/recipe", "ingredients":"potatoes"}]}`)},
+		{[]string{"sandwich"}, []string{"egg"}, 0, false, httpmock.NewStringResponder(404, `{"results": []}`)},
+		{[]string{"salad"}, []string{"mushroom"}, 0, true, httpmock.NewStringResponder(200, `😺`)},
+		{[]string{"nuggets"}, []string{"chicken"}, 0, true, httpmock.ResponderFromResponse(&http.Response{StatusCode: 501, Body: errReader(0)})},
+		{[]string{"steak"}, []string{"kangaroo"}, 0, true, httpmock.NewErrorResponder(errors.New("test error"))},
+	}
+
+	runAPICallTest(cases, t, FindRecipesWithIngredients)
 }
 
 func TestFindRecipesByIngredients(t *testing.T) {
-	runEmptyArgTest(t, FindRecipesByIngredient)
-
-	cases := []testCase{
-		{"potato", 1, false, httpmock.NewStringResponder(200, `{"results": [{"title": "Mashed Potatoes", "href": "link.to/recipe", "ingredients":"potatoes"}]}`)},
-		{"prawn", 0, false, httpmock.NewStringResponder(404, `{"results": []}`)},
-		{"mushroom", 0, true, httpmock.NewStringResponder(200, `😺`)},
-		{"chicken", 0, true, httpmock.ResponderFromResponse(&http.Response{StatusCode: 501, Body: errReader(0)})},
-		{"kangaroo", 0, true, httpmock.NewErrorResponder(errors.New("test error"))},
+	wrappedSubject := func(emptyArg []string, nonEmptyArg []string, page int) ([]Recipe, error) {
+		return FindRecipesByIngredients(nonEmptyArg, page)
 	}
 
-	runAPICallTest("i", cases, t, FindRecipesByIngredient)
+	runEmptyArgsTest(t, wrappedSubject)
+
+	cases := []testCase{
+		{[]string{}, []string{"potato"}, 1, false, httpmock.NewStringResponder(200, `{"results": [{"title": "Mashed Potatoes", "href": "link.to/recipe", "ingredients":"potatoes"}]}`)},
+		{[]string{}, []string{"prawn"}, 0, false, httpmock.NewStringResponder(404, `{"results": []}`)},
+		{[]string{}, []string{"mushroom"}, 0, true, httpmock.NewStringResponder(200, `😺`)},
+		{[]string{}, []string{"chicken"}, 0, true, httpmock.ResponderFromResponse(&http.Response{StatusCode: 501, Body: errReader(0)})},
+		{[]string{}, []string{"kangaroo"}, 0, true, httpmock.NewErrorResponder(errors.New("test error"))},
+	}
+
+	runAPICallTest(cases, t, wrappedSubject)
 }
