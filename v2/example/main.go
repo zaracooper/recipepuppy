@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/zaracooper/recipepuppy"
+	"github.com/zaracooper/recipepuppy/v2"
 )
 
 func main() {
