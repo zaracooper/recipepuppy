@@ -53,7 +53,7 @@ func FindRecipesWithIngredients(recipeTitles []string, ingredients []string, pag
 
 	results := response{}
 
-	err := makeRequest(url.Values{"q": recipeTitles}, &results)
+	err := makeRequest(url.Values{"q": recipeTitles, "i": ingredients}, &results)
 	if err != nil {
 		return nil, err
 	}
