@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"strings"
 )
 
 // Recipe is a recipe for a meal
@@ -27,16 +26,15 @@ type response struct {
 // APIHREF is the HREF of the Recipe Puppy API
 const APIHREF = "http://recipepuppy.com/api"
 
-// FindRecipes finds recipes that match the recipe titles provided. The API returns
-// 10 results at a time. So use page to specify what page of results to fecth.
-func FindRecipes(recipeTitles []string, page int) ([]Recipe, error) {
-	if isQueryBlank(recipeTitles) || page == 0 {
-		return []Recipe{}, errors.New("Recipe titles cannot be blank. Page cannot be zero")
+// FindRecipes finds recipes that match the search term provided
+func FindRecipes(searchTerm string) ([]Recipe, error) {
+	if len(searchTerm) == 0 {
+		return []Recipe{}, errors.New("Search term cannot be blank")
 	}
 
 	results := response{}
 
-	err := makeRequest(url.Values{"q": recipeTitles}, &results)
+	err := makeRequest(url.Values{"q": []string{searchTerm}}, &results)
 	if err != nil {
 		return nil, err
 	}
@@ -44,42 +42,20 @@ func FindRecipes(recipeTitles []string, page int) ([]Recipe, error) {
 	return results.Recipes, nil
 }
 
-// FindRecipesWithIngredients finds recipes that match the recipe titles and ingredients provided. The API returns
-// 10 results at a time. So use page to specify what page of results to fecth.
-func FindRecipesWithIngredients(recipeTitles []string, ingredients []string, page int) ([]Recipe, error) {
-	if isQueryBlank(recipeTitles) || isQueryBlank(ingredients) || page == 0 {
-		return []Recipe{}, errors.New("Recipe titles or ingredients cannot be blank. Page cannot be zero")
+// FindRecipesByIngredient finds recipes that use the provided ingredient
+func FindRecipesByIngredient(ingredient string) ([]Recipe, error) {
+	if len(ingredient) == 0 {
+		return []Recipe{}, errors.New("Ingredient cannot be blank")
 	}
 
 	results := response{}
 
-	err := makeRequest(url.Values{"q": recipeTitles, "i": ingredients}, &results)
+	err := makeRequest(url.Values{"i": []string{ingredient}}, &results)
 	if err != nil {
 		return nil, err
 	}
 
 	return results.Recipes, nil
-}
-
-// FindRecipesByIngredients finds recipes that use the provided ingredient. The API returns
-// 10 results at a time. So use page to specify what page of results to fecth.
-func FindRecipesByIngredients(ingredients []string, page int) ([]Recipe, error) {
-	if isQueryBlank(ingredients) || page == 0 {
-		return []Recipe{}, errors.New("Ingredient cannot be blank. Page cannot be zero")
-	}
-
-	results := response{}
-
-	err := makeRequest(url.Values{"i": ingredients}, &results)
-	if err != nil {
-		return nil, err
-	}
-
-	return results.Recipes, nil
-}
-
-func isQueryBlank(query []string) bool {
-	return len(strings.TrimSpace(strings.Join(query, ""))) == 0
 }
 
 func makeRequest(query url.Values, results interface{}) error {
