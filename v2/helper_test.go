@@ -8,13 +8,13 @@ import (
 	"github.com/jarcoal/httpmock"
 )
 
-func runEmptyArgsTest(t *testing.T, subject func([]string, []string, int) ([]Recipe, error)) {
-	if _, err := subject([]string{}, []string{}, 0); err == nil {
+func runEmptyArgsTest(t *testing.T, subject func(string, []string, int) ([]Recipe, error)) {
+	if _, err := subject("", []string{}, 0); err == nil {
 		t.Error("Expected error, got nil")
 	}
 }
 
-func runAPICallTest(cases []testCase, t *testing.T, subject func([]string, []string, int) ([]Recipe, error)) {
+func runAPICallTest(cases []testCase, t *testing.T, subject func(string, []string, int) ([]Recipe, error)) {
 	query := url.Values{}
 
 	var (
@@ -29,8 +29,8 @@ func runAPICallTest(cases []testCase, t *testing.T, subject func([]string, []str
 	for i := 0; i < len(cases); i++ {
 		testCase = cases[i]
 
-		if len(testCase.Recipes) > 0 {
-			query.Set("q", strings.Join(testCase.Recipes, ","))
+		if len(testCase.Recipe) > 0 {
+			query.Set("q", testCase.Recipe)
 		}
 
 		if len(testCase.Ingredients) > 0 {
@@ -39,7 +39,7 @@ func runAPICallTest(cases []testCase, t *testing.T, subject func([]string, []str
 
 		httpmock.RegisterResponderWithQuery("GET", APIHREF, query, testCase.Responder)
 
-		recipes, err = subject(testCase.Recipes, testCase.Ingredients, 1)
+		recipes, err = subject(testCase.Recipe, testCase.Ingredients, 1)
 		if testCase.GotError {
 			if err == nil {
 				t.Errorf("Expected error. Got: %v", err)
