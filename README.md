@@ -1,3 +1,4 @@
+[![GoDoc](https://godoc.org/github.com/zaracooper/recipepuppy?status.svg)](https://godoc.org/github.com/zaracooper/recipepuppy)
 <p align="center">
     <img width="263" height="108" src="recipepuppy.png" alt="centered image" />
 </p>
