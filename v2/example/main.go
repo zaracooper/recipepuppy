@@ -4,45 +4,35 @@ import (
 	"fmt"
 	"strings"
 
+	color "github.com/fatih/color"
 	"github.com/zaracooper/recipepuppy/v2"
 )
 
 func main() {
 	var (
-		page         = 1
-		recipeTitles []string
-		ingredients  []string
+		page        = 1
+		recipeTitle string
+		ingredients []string
 	)
 
-	recipeTitles = []string{"bhaji"}
-	recipes, err := recipepuppy.FindRecipes(recipeTitles, page)
-	if err != nil {
-		fmt.Println("Failed to get bhaji recipes")
-	} else {
-		printRecipes(recipes, page, recipeTitles)
-	}
+	recipeTitle = "french toast"
+	recipes, err := recipepuppy.FindRecipes(recipeTitle, page)
+	printRecipes(recipes, page, []string{recipeTitle}, err)
 
-	recipeTitles = []string{"steak"}
-	ingredients = []string{"eggs"}
-	recipes, err = recipepuppy.FindRecipesWithIngredients(recipeTitles, ingredients, page)
-	if err != nil {
-		fmt.Println("Failed to get steak recipes made with eggs")
-	} else {
-		printRecipes(recipes, page, append(recipeTitles, ingredients...))
-	}
+	recipeTitle = "fried chicken"
+	ingredients = []string{"eggs", "garlic"}
+	recipes, err = recipepuppy.FindRecipesWithIngredients(recipeTitle, ingredients, page)
+	printRecipes(recipes, page, append(ingredients, recipeTitle), err)
 
-	ingredients = []string{"duck"}
+	ingredients = []string{"duck", "cheese"}
 	recipes, err = recipepuppy.FindRecipesByIngredients([]string{"duck"}, page)
-	if err != nil {
-		fmt.Println("Failed to get recipes with duck as an ingredient")
-	} else {
-		printRecipes(recipes, page, ingredients)
-	}
+	printRecipes(recipes, page, ingredients, err)
 }
 
-func printRecipes(recipes []recipepuppy.Recipe, page int, searchTerms []string) {
-	if len(recipes) != 0 {
-		fmt.Printf("===RESULTS FOR %s===\n---PAGE %v---\n\n", strings.Join(searchTerms, ", "), page)
+func printRecipes(recipes []recipepuppy.Recipe, page int, searchTerms []string, err error) {
+	color.Green(fmt.Sprintf("Query: %s [page %v]\n\n", strings.Join(searchTerms, ", "), page))
+
+	if err == nil && len(recipes) != 0 {
 		var recipe recipepuppy.Recipe
 
 		for i := 0; i < len(recipes); i++ {
@@ -50,13 +40,13 @@ func printRecipes(recipes []recipepuppy.Recipe, page int, searchTerms []string) 
 				recipe.Picture = "None"
 			}
 
-			fmt.Printf("Recipe %v\n---\nTitle: %s,\nLink: %s,\nPicture: %s,\nIngredients: %s\n~\n\n",
-				i+1,
-				recipe.Title, recipe.Link, recipe.Picture, recipe.Ingredients)
+			fmt.Println(color.BlueString("No: "), "#", i+1)
+			fmt.Println(color.BlueString("Title: "), color.YellowString(recipe.Title))
+			fmt.Println(color.BlueString("Link: "), recipe.Link)
+			fmt.Println(color.BlueString("Picture: "), recipe.Picture)
+			fmt.Print(color.BlueString("Ingredients: "), strings.Join(recipe.Ingredients, ", "), "\n\n")
 		}
-
-		fmt.Print("\n===DONE===\n\n")
 	} else {
-		fmt.Print("Sorry\n---\nThere were no results for your query! 😔\n\n\n")
+		color.Red("Sorry. There were no results for your query! 😔\n\n")
 	}
 }
