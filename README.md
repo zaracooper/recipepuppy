@@ -6,3 +6,24 @@
 <h2 align="center">Recipe Puppy Go Client</h2>
 
 This is a Go client for the [recipepuppy.com](http://www.recipepuppy.com/about/api/) REST API. I made this to illustrate downgrading and upgrading modules for [this article](https://zaracooper.github.io/blog/posts/go-upgrades-downgrades/). 
+
+## Usage
+Add this as a dependency:
+```
+go get github.com/zaracooper/recipepuppy
+```
+
+To find recipes that match a title:
+```go
+recipes, err := recipepuppy.FindRecipes('steak', 1)
+```
+
+To find recipes that use certain ingredients:
+```go
+recipes, err := recipepuppy.FindRecipesByIngredients([]string{'egg', 'bacon'}, 1)
+```
+
+To find recipes that match a title and use the specified ingredients:
+```go
+recipes,  err := recipepuppy.FindRecipesWithIngredients('steak', []string{'eggs'}, 1)
+```
